@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thought Record</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4efe6;
+      --card: #ffffff;
+      --border: #ddd4c4;
+      --text: #2a1f12;
+      --muted: #8a7d6b;
+      --green: #4a7c59;
+      --green-light: #eaf2ec;
+      --brown: #7a5230;
+      --purple: #6b4e82;
+      --teal: #3d7a8a;
+      --input-bg: #faf7f2;
+      --shadow: 0 2px 18px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    #auth-screen h1 {
+      font-family: 'Lora', serif;
+      font-size: 30px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    #auth-screen p {
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 32px;
+      font-family: 'Lora', serif;
+      font-size: 15px;
+    }
+    #sign-in-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: 'Source Sans 3', sans-serif;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s;
+    }
+    #sign-in-btn:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+
+    /* ── MAIN APP ── */
+    #app { display: none; }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    }
+    header h1 {
+      font-family: 'Lora', serif;
+      font-size: 20px;
+      font-weight: 400;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+    #sign-out-btn {
+      font-size: 13px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+      text-decoration: underline;
+    }
+
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 16px 20px 0;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: #e6dfd4;
+      border-radius: 10px 10px 0 0;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── FORM CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: 0 0 16px 16px;
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-block {
+      border-left: 4px solid var(--green);
+      padding-left: 16px;
+      margin-bottom: 28px;
+    }
+    .section-block.s2 { border-color: var(--brown); }
+    .section-block.s3 { border-color: var(--purple); }
+    .section-block.s4 { border-color: var(--teal); }
+    .section-block.s5 { border-color: var(--green); }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--green);
+    }
+    .s2 .section-title { color: var(--brown); }
+    .s3 .section-title { color: var(--purple); }
+    .s4 .section-title { color: var(--teal); }
+
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .field-label label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text);
+    }
+    .field-hint {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 5px;
+      font-family: 'Lora', serif;
+    }
+
+    textarea, input[type="number"], select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      resize: vertical;
+    }
+    textarea:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--green);
+    }
+    input[type="number"] { resize: none; }
+    select { cursor: pointer; }
+    input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus { border-color: var(--green); }
+
+    /* ── MIC BUTTON ── */
+    .mic-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #e8e2d9;
+      color: var(--green);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .mic-btn.listening {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 0 0 4px rgba(74,124,89,0.25);
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(74,124,89,0.25); }
+      50% { box-shadow: 0 0 0 8px rgba(74,124,89,0.1); }
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .btn-primary {
+      flex: 1;
+      padding: 14px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #3d6b4a; }
+    .btn-primary.saved { background: #2e5c3b; }
+    .btn-secondary {
+      padding: 14px 20px;
+      background: #e8e2d9;
+      color: var(--text);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #d9d0c4; }
+
+    /* ── LOG TAB ── */
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 12px;
+    }
+    .log-header h2 {
+      font-family: 'Lora', serif;
+      font-size: 18px;
+      font-weight: 400;
+    }
+    .btn-print-all {
+      padding: 8px 16px;
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .entry-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .entry-summary {
+      width: 100%;
+      padding: 16px 18px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+    .entry-summary-left {}
+    .entry-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .entry-preview {
+      font-family: 'Lora', serif;
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .entry-chevron {
+      font-size: 18px;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .entry-chevron.open { transform: rotate(180deg); }
+
+    .entry-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .entry-body.open { display: block; }
+    .entry-field { margin-bottom: 12px; margin-top: 12px; }
+    .entry-field-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+    .entry-field-value {
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .entry-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn-print-entry {
+      padding: 7px 14px;
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 7px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .btn-delete-entry {
+      padding: 7px 14px;
+      background: none;
+      color: #b05030;
+      border: 1px solid #e0b0a0;
+      border-radius: 7px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-family: 'Lora', serif;
+      font-style: italic;
+      background: var(--card);
+      border-radius: 12px;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      body { background: white; font-size: 12pt; }
+      header, .tab-bar, .btn-row, .entry-actions, #sign-out-btn { display: none !important; }
+      .entry-card { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 20px; }
+      .entry-body { display: block !important; }
+      .entry-chevron { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <h1>Thought Record</h1>
+  <p>A private space to work through difficult thoughts.</p>
+  <button id="sign-in-btn">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Sign in with Google
+  </button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <h1>Thought Record</h1>
+    <div class="header-right">
+      <img id="user-avatar" src="" alt="avatar" />
+      <button id="sign-out-btn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="new">New Entry</button>
+    <button class="tab-btn" data-tab="log" id="log-tab-btn">Past Entries</button>
+  </div>
+
+  <div class="content">
+
+    <!-- NEW ENTRY TAB -->
+    <div class="tab-panel active" id="tab-new">
+      <div class="card">
+
+        <!-- Date/time -->
+        <div class="field-group" style="margin-bottom:24px;">
+          <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Date / Time</label>
+          <input type="text" id="f-datetime" style="margin-top:6px;" />
+        </div>
+
+        <!-- Section 1 -->
+        <div class="section-block s1">
+          <div class="section-title">1 — Situation</div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>What happened?</label>
+              <button class="mic-btn" data-target="f-situation">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <p class="field-hint">External event, or internal experience (emotion, image, thought about your future)</p>
+            <textarea id="f-situation" rows="3" placeholder="Describe the situation..."></textarea>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section-block s2">
+          <div class="section-title">2 — Automatic Thought</div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>What went through your mind?</label>
+              <button class="mic-btn" data-target="f-thought">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <p class="field-hint">Before, during, or after the event or unhelpful behavior</p>
+            <textarea id="f-thought" rows="3" placeholder="The thought or image..."></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label"><label>How much did you believe it? (0–100)</label></div>
+            <input type="number" id="f-thought-belief" min="0" max="100" placeholder="e.g. 80" />
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section-block s3">
+          <div class="section-title">3 — Emotion</div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>What did you feel?</label>
+              <button class="mic-btn" data-target="f-emotion">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <p class="field-hint">Sad, anxious, angry, ashamed, etc.</p>
+            <textarea id="f-emotion" rows="2" placeholder="Emotions..."></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label"><label>Intensity (0–100)</label></div>
+            <input type="number" id="f-emotion-intensity" min="0" max="100" placeholder="e.g. 75" />
+          </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section-block s4">
+          <div class="section-title">4 — Adaptive Response</div>
+          <div class="field-group">
+            <div class="field-label"><label>Cognitive distortion (optional)</label></div>
+            <select id="f-distortion">
+              <option value="">-- Select if applicable --</option>
+              <option>All-or-nothing thinking</option>
+              <option>Catastrophizing (fortune telling)</option>
+              <option>Disqualifying or discounting the positive</option>
+              <option>Emotional reasoning</option>
+              <option>Labeling</option>
+              <option>Magnification/minimization</option>
+              <option>Mental filter (selective abstraction)</option>
+              <option>Mind reading</option>
+              <option>Overgeneralization</option>
+              <option>Personalization</option>
+              <option>"Should" and "must" statements</option>
+              <option>Tunnel vision</option>
+              <option>Other / not sure</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>Your response to the automatic thought</label>
+              <button class="mic-btn" data-target="f-adaptive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <p class="field-hint">What is the evidence? Is there another explanation? What would you tell a friend?</p>
+            <textarea id="f-adaptive" rows="4" placeholder="Compose an adaptive response..."></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label"><label>How much do you believe this response? (0–100)</label></div>
+            <input type="number" id="f-adaptive-belief" min="0" max="100" placeholder="e.g. 60" />
+          </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="section-block s5">
+          <div class="section-title">5 — Outcome</div>
+          <div class="field-group">
+            <div class="field-label"><label>How much do you now believe the original thought? (0–100)</label></div>
+            <input type="number" id="f-outcome-belief" min="0" max="100" placeholder="e.g. 40" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>What emotion(s) do you feel now?</label>
+              <button class="mic-btn" data-target="f-outcome-emotion">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <textarea id="f-outcome-emotion" rows="2" placeholder="Current emotions..."></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label"><label>Intensity now (0–100)</label></div>
+            <input type="number" id="f-outcome-intensity" min="0" max="100" placeholder="e.g. 35" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">
+              <label>What would be good to do?</label>
+              <button class="mic-btn" data-target="f-action">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+              </button>
+            </div>
+            <textarea id="f-action" rows="2" placeholder="Next step or action..."></textarea>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="save-btn">Save Entry</button>
+          <button class="btn-secondary" id="print-current-btn">Print / PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG TAB -->
+    <div class="tab-panel" id="tab-log">
+      <div class="log-header">
+        <h2>Past Entries</h2>
+        <button class="btn-print-all" id="print-all-btn">Print All</button>
+      </div>
+      <div id="entries-container">
+        <div class="loading-state">Loading entries...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PRINT TEMPLATE (hidden) -->
+<div id="print-area" style="display:none;"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── REPLACE THIS BLOCK WITH YOUR FIREBASE CONFIG ──
+  const firebaseConfig = {
+    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID"
+  };
+  // ── END CONFIG BLOCK ──
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  let currentUser = null;
+
+  // ── AUTH ──
+  document.getElementById("sign-in-btn").addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      alert("Sign-in failed. Make sure pop-ups are allowed.");
+    }
+  });
+
+  document.getElementById("sign-out-btn").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    if (user) {
+      document.getElementById("auth-screen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("user-avatar").src = user.photoURL || "";
+      loadEntries();
+    } else {
+      document.getElementById("auth-screen").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+    }
+  });
+
+  // ── TABS ──
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-" + tab).classList.add("active");
+      if (tab === "log") loadEntries();
+    });
+  });
+
+  // ── SET DEFAULT DATETIME ──
+  function setDefaultDatetime() {
+    const now = new Date();
+    document.getElementById("f-datetime").value = now.toLocaleString("en-US", {
+      month: "short", day: "numeric", year: "numeric",
+      hour: "numeric", minute: "2-digit"
+    });
+  }
+  setDefaultDatetime();
+
+  // ── MIC DICTATION ──
+  let activeRecognition = null;
+  let activeMicBtn = null;
+
+  document.querySelectorAll(".mic-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.target;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser. Try Chrome on desktop or Android.");
+        return;
+      }
+      if (activeMicBtn === btn) {
+        // Stop current
+        activeRecognition?.stop();
+        btn.classList.remove("listening");
+        activeMicBtn = null;
+        activeRecognition = null;
+        return;
+      }
+      // Stop any previous
+      if (activeRecognition) {
+        activeRecognition.stop();
+        activeMicBtn?.classList.remove("listening");
+      }
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+      rec.onresult = e => {
+        const transcript = e.results[0][0].transcript;
+        const el = document.getElementById(targetId);
+        el.value = el.value ? el.value + " " + transcript : transcript;
+      };
+      rec.onend = () => {
+        btn.classList.remove("listening");
+        if (activeMicBtn === btn) activeMicBtn = null;
+        activeRecognition = null;
+      };
+      rec.onerror = () => {
+        btn.classList.remove("listening");
+        activeMicBtn = null;
+        activeRecognition = null;
+      };
+      activeRecognition = rec;
+      activeMicBtn = btn;
+      btn.classList.add("listening");
+      rec.start();
+    });
+  });
+
+  // ── COLLECT FORM ──
+  function collectForm() {
+    return {
+      datetime: document.getElementById("f-datetime").value,
+      situation: document.getElementById("f-situation").value,
+      thought: document.getElementById("f-thought").value,
+      thoughtBelief: document.getElementById("f-thought-belief").value,
+      emotion: document.getElementById("f-emotion").value,
+      emotionIntensity: document.getElementById("f-emotion-intensity").value,
+      distortion: document.getElementById("f-distortion").value,
+      adaptive: document.getElementById("f-adaptive").value,
+      adaptiveBelief: document.getElementById("f-adaptive-belief").value,
+      outcomeBelief: document.getElementById("f-outcome-belief").value,
+      outcomeEmotion: document.getElementById("f-outcome-emotion").value,
+      outcomeIntensity: document.getElementById("f-outcome-intensity").value,
+      action: document.getElementById("f-action").value,
+    };
+  }
+
+  function clearForm() {
+    ["f-situation","f-thought","f-thought-belief","f-emotion","f-emotion-intensity",
+     "f-distortion","f-adaptive","f-adaptive-belief","f-outcome-belief",
+     "f-outcome-emotion","f-outcome-intensity","f-action"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    setDefaultDatetime();
+  }
+
+  // ── SAVE ──
+  document.getElementById("save-btn").addEventListener("click", async () => {
+    if (!currentUser) return;
+    const data = collectForm();
+    if (!data.situation && !data.thought) {
+      alert("Please fill in at least the situation or automatic thought before saving.");
+      return;
+    }
+    const btn = document.getElementById("save-btn");
+    btn.textContent = "Saving...";
+    btn.disabled = true;
+    try {
+      await addDoc(collection(db, "users", currentUser.uid, "entries"), {
+        ...data,
+        createdAt: serverTimestamp()
+      });
+      btn.textContent = "Saved ✓";
+      btn.classList.add("saved");
+      setTimeout(() => {
+        btn.textContent = "Save Entry";
+        btn.disabled = false;
+        btn.classList.remove("saved");
+        clearForm();
+      }, 1800);
+    } catch (e) {
+      btn.textContent = "Save Entry";
+      btn.disabled = false;
+      alert("Error saving. Check your connection.");
+    }
+  });
+
+  // ── LOAD ENTRIES ──
+  async function loadEntries() {
+    if (!currentUser) return;
+    const container = document.getElementById("entries-container");
+    container.innerHTML = '<div class="loading-state">Loading...</div>';
+    try {
+      const q = query(
+        collection(db, "users", currentUser.uid, "entries"),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const logTabBtn = document.getElementById("log-tab-btn");
+      logTabBtn.textContent = `Past Entries (${snap.size})`;
+
+      if (snap.empty) {
+        container.innerHTML = '<div class="empty-state">No entries yet. Complete your first thought record to see it here.</div>';
+        return;
+      }
+      container.innerHTML = "";
+      snap.forEach(docSnap => {
+        const e = docSnap.data();
+        container.appendChild(buildEntryCard(docSnap.id, e));
+      });
+    } catch (err) {
+      container.innerHTML = '<div class="loading-state">Error loading entries.</div>';
+    }
+  }
+
+  // ── BUILD ENTRY CARD ──
+  function buildEntryCard(id, e) {
+    const card = document.createElement("div");
+    card.className = "entry-card";
+
+    const fields = [
+      ["Situation", e.situation],
+      ["Automatic Thought", e.thought + (e.thoughtBelief ? ` (Belief: ${e.thoughtBelief}%)` : "")],
+      ["Emotion", e.emotion + (e.emotionIntensity ? ` — Intensity: ${e.emotionIntensity}%` : "")],
+      ["Cognitive Distortion", e.distortion],
+      ["Adaptive Response", e.adaptive + (e.adaptiveBelief ? ` (Belief: ${e.adaptiveBelief}%)` : "")],
+      ["Outcome — Original Thought Belief", e.outcomeBelief ? e.outcomeBelief + "%" : ""],
+      ["Outcome — Emotion Now", e.outcomeEmotion + (e.outcomeIntensity ? ` — Intensity: ${e.outcomeIntensity}%` : "")],
+      ["Next Action", e.action],
+    ].filter(([, v]) => v && v.trim() && v.trim() !== "%");
+
+    card.innerHTML = `
+      <button class="entry-summary">
+        <div class="entry-summary-left">
+          <div class="entry-date">${e.datetime || "No date"}</div>
+          <div class="entry-preview">${e.situation || e.thought || "No detail"}</div>
+        </div>
+        <span class="entry-chevron">▾</span>
+      </button>
+      <div class="entry-body">
+        ${fields.map(([label, val]) => `
+          <div class="entry-field">
+            <div class="entry-field-label">${label}</div>
+            <div class="entry-field-value">${val}</div>
+          </div>
+        `).join("")}
+        <div class="entry-actions">
+          <button class="btn-print-entry">Print / PDF</button>
+          <button class="btn-delete-entry">Delete</button>
+        </div>
+      </div>
+    `;
+
+    const summary = card.querySelector(".entry-summary");
+    const body = card.querySelector(".entry-body");
+    const chevron = card.querySelector(".entry-chevron");
+    summary.addEventListener("click", () => {
+      const open = body.classList.toggle("open");
+      chevron.classList.toggle("open", open);
+    });
+
+    card.querySelector(".btn-print-entry").addEventListener("click", () => printEntry(e));
+    card.querySelector(".btn-delete-entry").addEventListener("click", async () => {
+      if (!confirm("Delete this entry? This cannot be undone.")) return;
+      await deleteDoc(doc(db, "users", currentUser.uid, "entries", id));
+      card.remove();
+      const remaining = document.querySelectorAll(".entry-card").length;
+      document.getElementById("log-tab-btn").textContent = `Past Entries (${remaining})`;
+      if (remaining === 0) {
+        document.getElementById("entries-container").innerHTML =
+          '<div class="empty-state">No entries yet.</div>';
+      }
+    });
+
+    return card;
+  }
+
+  // ── PRINT SINGLE ENTRY ──
+  function entryToHTML(e, title) {
+    const fields = [
+      ["Situation", e.situation],
+      ["Automatic Thought", e.thought],
+      ["Belief in Thought", e.thoughtBelief ? e.thoughtBelief + "%" : ""],
+      ["Emotion(s)", e.emotion],
+      ["Emotion Intensity", e.emotionIntensity ? e.emotionIntensity + "%" : ""],
+      ["Cognitive Distortion", e.distortion],
+      ["Adaptive Response", e.adaptive],
+      ["Belief in Adaptive Response", e.adaptiveBelief ? e.adaptiveBelief + "%" : ""],
+      ["Outcome — Belief in Original Thought", e.outcomeBelief ? e.outcomeBelief + "%" : ""],
+      ["Outcome — Emotion Now", e.outcomeEmotion],
+      ["Outcome — Emotion Intensity", e.outcomeIntensity ? e.outcomeIntensity + "%" : ""],
+      ["Next Action", e.action],
+    ].filter(([, v]) => v && v.trim());
+
+    return `
+      <div style="page-break-inside:avoid; margin-bottom:40px;">
+        <h2 style="font-family:Georgia,serif;font-size:16pt;font-weight:400;border-bottom:2px solid #4a7c59;padding-bottom:8px;margin-bottom:16px;">${title || "Thought Record"}</h2>
+        <p style="color:#888;font-size:11pt;margin-bottom:18px;">${e.datetime || ""}</p>
+        ${fields.map(([l, v]) => `
+          <div style="margin-bottom:12px;">
+            <div style="font-size:9pt;text-transform:uppercase;letter-spacing:0.07em;color:#4a7c59;font-weight:600;margin-bottom:3px;">${l}</div>
+            <div style="font-family:Georgia,serif;font-size:12pt;line-height:1.5;">${v}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function printEntry(e) {
+    const html = `<!DOCTYPE html><html><head><title>Thought Record — ${e.datetime}</title>
+      <style>body{font-family:Georgia,serif;max-width:680px;margin:40px auto;color:#2a1f12;line-height:1.6;}@media print{body{margin:20px;}}</style>
+      </head><body>${entryToHTML(e, "Thought Record")}</body></html>`;
+    const w = window.open("", "_blank");
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 400);
+  }
+
+  document.getElementById("print-current-btn").addEventListener("click", () => {
+    printEntry(collectForm());
+  });
+
+  // ── PRINT ALL ──
+  document.getElementById("print-all-btn").addEventListener("click", async () => {
+    if (!currentUser) return;
+    const q = query(
+      collection(db, "users", currentUser.uid, "entries"),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) { alert("No entries to print."); return; }
+    let body = `<h1 style="font-family:Georgia,serif;font-size:22pt;font-weight:400;border-bottom:3px solid #4a7c59;padding-bottom:10px;margin-bottom:32px;">Thought Record Log</h1>`;
+    snap.forEach(docSnap => {
+      body += entryToHTML(docSnap.data());
+    });
+    const html = `<!DOCTYPE html><html><head><title>Thought Record Log</title>
+      <style>body{font-family:Georgia,serif;max-width:680px;margin:40px auto;color:#2a1f12;line-height:1.6;}@media print{body{margin:20px;}}</style>
+      </head><body>${body}</body></html>`;
+    const w = window.open("", "_blank");
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 600);
+  });
+
+</script>
+</body>
+</html>
